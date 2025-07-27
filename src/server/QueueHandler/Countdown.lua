@@ -1,6 +1,6 @@
 local TeleportService = game:GetService("TeleportService")
 local Config = require(script.Parent.QueueConfig)
-local activePlayers = script.Parent.activePlayers
+local activePlayers = script.Parent.QueueHandler.activePlayers
 local Timer = game.Workspace.QueueFolder.Timer.T.SurfaceGui.Time
 
 -- Formats seconds to MM:SS
