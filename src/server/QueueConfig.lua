@@ -1,4 +1,4 @@
-MMconfig = {
+QueueConfig = {
 
 	COUNTDOWN_TIME = 90,
 	MIN_PLAYERS = 5,
@@ -7,4 +7,4 @@ MMconfig = {
 
 }
 
-return MMconfig
+return QueueConfig
