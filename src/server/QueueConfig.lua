@@ -1,0 +1,10 @@
+MMconfig = {
+
+	COUNTDOWN_TIME = 90,
+	MIN_PLAYERS = 5,
+	MAX_PLAYERS = 48,
+	MAIN_GAME_PLACE_ID = 130973086786098,
+
+}
+
+return MMconfig

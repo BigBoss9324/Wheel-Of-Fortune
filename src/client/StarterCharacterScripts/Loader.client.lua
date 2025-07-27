@@ -1,2 +1,1 @@
-local MainMenu = require(game.ReplicatedStorage.Handlers.MainMenu)
-MainMenu:Initialize()
+-- local Init = require(game.ReplicatedStorage)
