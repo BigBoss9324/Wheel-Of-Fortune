@@ -3,15 +3,14 @@ local QueueFolder = game.Workspace:WaitForChild("QueueFolder")
 local QueueCircle = QueueFolder:WaitForChild("QueueCircle")
 local QueueLeave = QueueFolder:WaitForChild("QueueLeave")
 
--- Prevent duplicate tracking
-local activePlayers = {}
+activePlayers = {}
 
 local function removePlayer(plr, x)
 	if activePlayers[plr] then
 		activePlayers[plr] = nil
 		print("Removed player from Queue:", plr.Name)
 		if x ~= 1 then
-			plr.HumanoidRootPart.CFrame = QueueLeave.CFrame
+			plr:FindFirstChild("HumanoidRootPart").CFrame = QueueLeave.CFrame
 		end
 	end
 end
@@ -25,7 +24,7 @@ local function addPlayerToQueue(plr)
             humanoid.Died:Connect(function()
                 removePlayer(plr, 1)
             end)
-        end
+        end-- Ensure the player is fully added before any further actions
     end
 end
 
@@ -37,6 +36,7 @@ QueueCircle.Touched:Connect(function(hit)
 end)
 
 Players.PlayerRemoving:Connect(function(plr)
+	print("Player leaving:", plr.Name)
 	removePlayer(plr, 1)
 end)
 
@@ -49,3 +49,5 @@ while true do
 	end
 	task.wait(7.5)
 end
+
+return activePlayers
