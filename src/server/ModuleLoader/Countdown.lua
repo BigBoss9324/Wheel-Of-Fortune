@@ -20,8 +20,6 @@ local function getQueuedPlayers()
         end
     end
     QueueManager:ClearPlayers()
-    print("Total queued players:", #players)
-    print("Players \n", players)
     return players
 end
 

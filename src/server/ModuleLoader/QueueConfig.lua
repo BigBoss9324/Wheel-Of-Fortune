@@ -1,4 +1,4 @@
-QueueConfig = {
+module = {
 
 	COUNTDOWN_TIME = 120, -- in seconds
 	MIN_PLAYERS = 1,
@@ -7,4 +7,4 @@ QueueConfig = {
 
 }
 
-return QueueConfig
+return module
