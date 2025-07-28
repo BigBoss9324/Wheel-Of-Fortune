@@ -1,3 +1,4 @@
+local Countdown = {}
 local TeleportService = game:GetService("TeleportService")
 local Config = require(script.Parent.QueueConfig)
 local activePlayers = script.Parent.Queue.activePlayers
@@ -30,10 +31,8 @@ task.spawn(function()
 			task.wait(1)
 			countdown = countdown - 1
 		end
-
 		Timer.Text = "00:00"
 		print("Countdown complete. Checking for queued players...")
-
 		local playersToTeleport = getQueuedPlayers()
 		if #playersToTeleport > 0 then
 			print("Teleporting", #playersToTeleport, "players...")
@@ -42,7 +41,8 @@ task.spawn(function()
 		else
 			print("No players to teleport.")
 		end
-
 		task.wait(1) -- optional delay before next loop starts
 	end
 end)
+
+return Countdown

@@ -1,9 +1,10 @@
+local QueueManager = {}
 local Players = game:GetService("Players")
 local QueueFolder = game.Workspace:WaitForChild("QueueFolder")
 local QueueCircle = QueueFolder:WaitForChild("QueueCircle")
 local QueueLeave = QueueFolder:WaitForChild("QueueLeave")
 
-activePlayers = {}
+local activePlayers = {}
 
 local function removePlayer(plr, x)
 	if activePlayers[plr] then
@@ -40,6 +41,11 @@ Players.PlayerRemoving:Connect(function(plr)
 	removePlayer(plr, 1)
 end)
 
+
+function QueueManager:GetAllPlayers()
+	return activePlayers
+end
+
 --Debug Will remove
 while true do
 	print("Queue server is running...", os.date("%X"))
@@ -50,4 +56,4 @@ while true do
 	task.wait(7.5)
 end
 
-return activePlayers
+return QueueManager
