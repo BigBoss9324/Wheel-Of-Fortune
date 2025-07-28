@@ -1,4 +1,5 @@
 local QueueManager = {}
+local RS = game:GetService("ReplicatedStorage")
 local Players = game:GetService("Players")
 local QueueFolder = game.Workspace:WaitForChild("QueueFolder")
 local QueueCircle = QueueFolder:WaitForChild("QueueCircle")
@@ -6,12 +7,12 @@ local QueueLeave = QueueFolder:WaitForChild("QueueLeave")
 
 local activePlayers = {}
 
-local function removePlayer(plr, x)
+function QueueManager:removePlayer(plr, x)
 	if activePlayers[plr] then
 		activePlayers[plr] = nil
-		print("Removed player from Queue:", plr.Name)
+		RS.RemoteEvents.Queue:FireClient(plr, "0")
 		if x ~= 1 then
-			plr:FindFirstChild("HumanoidRootPart").CFrame = QueueLeave.CFrame
+			plr.Character:FindFirstChild("HumanoidRootPart").CFrame = QueueLeave.CFrame
 		end
 	end
 end
@@ -21,24 +22,25 @@ local function addPlayerToQueue(char)
     if not activePlayers[plr] then
         activePlayers[plr] = plr
         local humanoid = plr:FindFirstChild("Humanoid")
+		RS.RemoteEvents.Queue:FireClient(plr, "1")
         if humanoid then
             humanoid.Died:Connect(function()
-                removePlayer(plr, 1)
+                QueueManager:removePlayer(plr, 1)
             end)
-        end-- Ensure the player is fully added before any further actions
+        end
     end
 end
 
 QueueCircle.Touched:Connect(function(hit)
-	local plr = hit.Parent
-	if not plr or not plr:FindFirstChild("Humanoid") then return end
-    if activePlayers[plr] then return end
-	addPlayerToQueue(plr)
+	local plr = Players:GetPlayerFromCharacter(hit.Parent)
+	if plr and not activePlayers[plr] then
+		addPlayerToQueue(hit.Parent)
+	end
 end)
 
 Players.PlayerRemoving:Connect(function(plr)
 	print("Player leaving:", plr.Name)
-	removePlayer(plr, 1)
+	QueueManager:removePlayer(plr, 1)
 end)
 
 function QueueManager:GetAllPlayers()
@@ -50,6 +52,12 @@ function QueueManager:ClearPlayers()
         activePlayers[x] = nil
     end
 end
+
+RS.RemoteEvents.Queue.OnServerEvent:Connect(function(plr, x)
+	if x == "1" then
+		return QueueManager:removePlayer(plr)
+	end
+end)
 
 -- Debug Will remove
 task.spawn(function()
