@@ -3,8 +3,8 @@ if game.PlaceId ~= 77660193270787 then
 	return
 end
 
-local ModuleLoader = script
-for _, module in ipairs(ModuleLoader:GetChildren()) do
+local QueueLoader = script
+for _, module in ipairs(QueueLoader:GetChildren()) do
 	if module:IsA("ModuleScript") then
 		local success, result = pcall(function()
 			return require(module)
