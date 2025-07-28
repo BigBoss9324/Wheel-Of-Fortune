@@ -38,12 +38,21 @@ local Commands = {
         end
     end,
     settime = function(plr, args)
-        print("Setting countdown time to:", args[1])
-        print(args)
         local QueueConfig = require(game.ServerScriptService.ModuleLoader.QueueConfig)
-        if tonumber(args[1]) == nil then return end
+        if tonumber(args[1]) == nil then
+            return
+        end
         QueueConfig.COUNTDOWN_TIME = tonumber(args[1])
     end,
+    setminplayers = function(plr, args)
+        print("Setting Min Players:", args[1])
+        print(args)
+        local QueueConfig = require(game.ServerScriptService.ModuleLoader.QueueConfig)
+        if tonumber(args[1]) == nil then
+            return
+        end
+        QueueConfig.MIN_PLAYERS = tonumber(args[1])
+    end
 }
 
 local function onChatted(plr, msg)

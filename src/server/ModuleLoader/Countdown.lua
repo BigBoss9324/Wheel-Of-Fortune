@@ -24,10 +24,10 @@ local function getQueuedPlayers()
 end
 
 task.spawn(function()
-    local lastCountdownTime = Config.COUNTDOWN_TIME
     while true do
         local countdown = Config.COUNTDOWN_TIME
-        lastCountdownTime = countdown
+        local lastCountdownTime = Config.COUNTDOWN_TIME
+        local lastPlayerMin = Config.MIN_PLAYERS
         while countdown > 0 do
             if Config.COUNTDOWN_TIME ~= lastCountdownTime then
                 countdown = Config.COUNTDOWN_TIME
@@ -35,36 +35,49 @@ task.spawn(function()
                 Timer.Text = "Changing Timer to " .. tostring(Config.COUNTDOWN_TIME)
                 task.wait(1.5)
             end
+            if Config.MIN_PLAYERS ~= lastPlayerMin then
+                lastPlayerMin = Config.MIN_PLAYERS
+                Timer.Text = "Changing Min Player \n Requirement to " .. tostring(Config.MIN_PLAYERS)
+                task.wait(1.5)
+            end
             Timer.Text = formatTime(countdown)
             task.wait(1)
-			local tone = game.Workspace.QueueFolder.Timer.Tone
-			tone:Stop()
-			tone:Play()
+            local tone = game.Workspace.QueueFolder.Timer.Tone
+            tone:Stop()
+            tone:Play()
             countdown = countdown - 1
         end
 
-        local dots = {"", ".", "..", "..."}
-        local count = 3
-        while count >= 0 do
-            for _, suffix in ipairs(dots) do
-                Timer.Text = "Teleporting" .. suffix
-                task.wait(0.35)
+        local teleporting = task.spawn(function()
+            local count = 3
+            local dots = {"", ".", "..", "..."}
+            while count >= 0 do
+                for _, suffix in ipairs(dots) do
+                    Timer.Text = "Teleporting" .. suffix
+                    task.wait(0.35)
+                end
+                count = count - 1
             end
-            count = count - 1
-        end
+        end)
 
         local playersToTeleport = getQueuedPlayers()
         if #playersToTeleport >= Config.MIN_PLAYERS then
             task.wait(1)
+
             local success, err = pcall(function()
-                TeleportService:TeleportPartyAsync(Config.PLACE_ID, playersToTeleport)
+                local reservedCode = TeleportService:ReserveServer(Config.PLACE_ID)
+                TeleportService:TeleportToPrivateServer(Config.PLACE_ID, reservedCode, playersToTeleport)
             end)
+
             if not success then
+                task.cancel(teleporting)
                 Timer.Text = "Teleport Failed Due to an Error :/ \n" .. tostring(err)
                 warn("Teleport failed:", err)
                 task.wait(1)
             end
+
         else
+            task.cancel(teleporting)
             Timer.Text = "Not enough players \n to teleport."
         end
         task.wait(1)
