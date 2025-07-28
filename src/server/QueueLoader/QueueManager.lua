@@ -1,4 +1,5 @@
 local QueueManager = {}
+
 local RS = game:GetService("ReplicatedStorage")
 local Players = game:GetService("Players")
 local QueueFolder = game.Workspace:WaitForChild("QueueFolder")

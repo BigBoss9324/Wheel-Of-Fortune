@@ -1,4 +1,6 @@
 -- Made by BigBoss9324 690634329591906316 --
+local module = {}
+
 local Admins = {267811095}
 
 local Prefix = ":"
@@ -52,3 +54,5 @@ game.Players.PlayerAdded:Connect(function(plr)
         onChatted(plr, msg)
     end)
 end)
+
+return module

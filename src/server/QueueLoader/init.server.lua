@@ -1,3 +1,8 @@
+if game.PlaceId ~= 77660193270787 then
+	script:Destroy()
+	return
+end
+
 local ModuleLoader = script
 for _, module in ipairs(ModuleLoader:GetChildren()) do
 	if module:IsA("ModuleScript") then
