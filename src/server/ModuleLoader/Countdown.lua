@@ -16,7 +16,7 @@ local function getQueuedPlayers()
     for plr, _ in pairs(QueueManager:GetAllPlayers()) do
         if plr and plr:IsDescendantOf(game.Players) then
             table.insert(players, plr)
-            QueueManager:removePlayer(plr, 1) -- Remove player from queue after adding to teleport list
+            QueueManager:removePlayer(plr)
         end
     end
     QueueManager:ClearPlayers()
@@ -26,14 +26,35 @@ local function getQueuedPlayers()
 end
 
 task.spawn(function()
+    local lastCountdownTime = Config.COUNTDOWN_TIME
     while true do
         local countdown = Config.COUNTDOWN_TIME
+        lastCountdownTime = countdown
         while countdown > 0 do
+            if Config.COUNTDOWN_TIME ~= lastCountdownTime then
+                countdown = Config.COUNTDOWN_TIME
+                lastCountdownTime = countdown
+                Timer.Text = "Changing Timer to " .. tostring(Config.COUNTDOWN_TIME)
+                task.wait(1.5)
+            end
             Timer.Text = formatTime(countdown)
             task.wait(1)
+			local tone = game.Workspace.QueueFolder.Timer.Tone
+			tone:Stop()
+			tone:Play()
             countdown = countdown - 1
         end
-        Timer.Text = "Teleporting..."
+
+        local dots = {"", ".", "..", "..."}
+        local count = 3
+        while count >= 0 do
+            for _, suffix in ipairs(dots) do
+                Timer.Text = "Teleporting" .. suffix
+                task.wait(0.35)
+            end
+            count = count - 1
+        end
+
         local playersToTeleport = getQueuedPlayers()
         if #playersToTeleport >= Config.MIN_PLAYERS then
             task.wait(1)
@@ -41,13 +62,14 @@ task.spawn(function()
                 TeleportService:TeleportPartyAsync(Config.PLACE_ID, playersToTeleport)
             end)
             if not success then
+                Timer.Text = "Teleport Failed Due to an Error :/ \n" .. tostring(err)
                 warn("Teleport failed:", err)
+                task.wait(1)
             end
         else
-            Timer.Text = "Not enough players to teleport."
-            print("Not enough players to teleport.")
+            Timer.Text = "Not enough players \n to teleport."
         end
-        task.wait(2)
+        task.wait(1)
     end
 end)
 
