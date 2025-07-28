@@ -4,9 +4,7 @@ for _, module in ipairs(ModuleLoader:GetChildren()) do
 		local success, result = pcall(function()
 			return require(module)
 		end)
-		if success then
-			print("Successfully loaded:", module.Name)
-		else
+		if not success then
 			warn("Failed to load module:", module.Name, "\nError:", result)
 		end
 	end

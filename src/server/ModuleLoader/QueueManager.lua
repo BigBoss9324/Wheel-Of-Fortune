@@ -45,16 +45,22 @@ function QueueManager:GetAllPlayers()
 	return activePlayers
 end
 
+function QueueManager:ClearPlayers()
+    for x in pairs(activePlayers) do
+        activePlayers[x] = nil
+    end
+end
+
 -- Debug Will remove
--- task.spawn(function()
--- 	print("Queue server is running...")
--- 	while true do
--- 		print(os.date("%X"), "Active players:")
--- 		for plr, _ in pairs(activePlayers) do
--- 			print(" -", plr.Name)
--- 		end
--- 		task.wait(7.5)
--- 	end
--- end)
+task.spawn(function()
+	print("Queue server is running...")
+	while true do
+		print(os.date("%X"), "Active players:")
+		for plr, _ in pairs(activePlayers) do
+			print(" -", plr.Name)
+		end
+		task.wait(7.5)
+	end
+end)
 
 return QueueManager
