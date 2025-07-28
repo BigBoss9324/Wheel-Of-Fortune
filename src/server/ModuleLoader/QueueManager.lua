@@ -16,8 +16,8 @@ local function removePlayer(plr, x)
 	end
 end
 
-local function addPlayerToQueue(plr)
-    print("Adding player to matchmaking folder:", plr.Name)
+local function addPlayerToQueue(char)
+	local plr = game.Players:GetPlayerFromCharacter(char)
     if not activePlayers[plr] then
         activePlayers[plr] = plr
         local humanoid = plr:FindFirstChild("Humanoid")
@@ -41,19 +41,20 @@ Players.PlayerRemoving:Connect(function(plr)
 	removePlayer(plr, 1)
 end)
 
-
 function QueueManager:GetAllPlayers()
 	return activePlayers
 end
 
---Debug Will remove
-while true do
-	print("Queue server is running...", os.date("%X"))
-	print("Active players:")
-	for plr, _ in pairs(activePlayers) do
-		print(" -", plr.Name)
-	end
-	task.wait(7.5)
-end
+-- Debug Will remove
+-- task.spawn(function()
+-- 	print("Queue server is running...")
+-- 	while true do
+-- 		print(os.date("%X"), "Active players:")
+-- 		for plr, _ in pairs(activePlayers) do
+-- 			print(" -", plr.Name)
+-- 		end
+-- 		task.wait(7.5)
+-- 	end
+-- end)
 
 return QueueManager

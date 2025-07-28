@@ -1,10 +1,9 @@
 local Countdown = {}
 local TeleportService = game:GetService("TeleportService")
 local Config = require(script.Parent.QueueConfig)
-local activePlayers = script.Parent.Queue.activePlayers
+local QueueManager = require(script.Parent.QueueManager)
 local Timer = game.Workspace.QueueFolder.Timer.T.SurfaceGui.Time
 
--- Formats seconds to MM:SS
 local function formatTime(seconds)
 	local minutes = math.floor(seconds / 60)
 	local secs = seconds % 60
@@ -14,15 +13,16 @@ end
 -- Gets all active players in queue
 local function getQueuedPlayers()
 	local players = {}
-	for plr, _ in pairs(activePlayers) do
+	for plr, _ in pairs(QueueManager:GetAllPlayers()) do
 		if plr and plr:IsDescendantOf(game.Players) then
 			table.insert(players, plr)
 		end
 	end
+	print("Total queued players:", #players)
+	print("Players \n", players)
 	return players
 end
 
--- Starts countdown loop
 task.spawn(function()
 	while true do
 		local countdown = Config.COUNTDOWN_TIME
@@ -37,11 +37,11 @@ task.spawn(function()
 		if #playersToTeleport > 0 then
 			print("Teleporting", #playersToTeleport, "players...")
 			task.wait(1) -- wait a sec for UI clarity
-			TeleportService:TeleportPartyAsync(Config.MAIN_GAME_PLACE_ID, playersToTeleport)
+			TeleportService:TeleportPartyAsync(Config.PLACE_ID, playersToTeleport)
 		else
-			print("No players to teleport.")
+			warn("No players to teleport.")
 		end
-		task.wait(1) -- optional delay before next loop starts
+		task.wait(3)
 	end
 end)
 
