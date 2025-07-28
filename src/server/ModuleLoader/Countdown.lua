@@ -16,7 +16,7 @@ local function getQueuedPlayers()
     for plr, _ in pairs(QueueManager:GetAllPlayers()) do
         if plr and plr:IsDescendantOf(game.Players) then
             table.insert(players, plr)
-            QueueManager:removePlayer(plr)
+            QueueManager:removePlayer(plr, 1)
         end
     end
     QueueManager:ClearPlayers()
