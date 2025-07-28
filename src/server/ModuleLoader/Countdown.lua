@@ -48,8 +48,8 @@ task.spawn(function()
             countdown = countdown - 1
         end
 
+        local count = 3
         local teleporting = task.spawn(function()
-            local count = 3
             local dots = {"", ".", "..", "..."}
             while count >= 0 do
                 for _, suffix in ipairs(dots) do
@@ -80,7 +80,7 @@ task.spawn(function()
             task.cancel(teleporting)
             Timer.Text = "Not enough players \n to teleport."
         end
-        task.wait(1)
+        task.wait(count + 2.5)
     end
 end)
 
