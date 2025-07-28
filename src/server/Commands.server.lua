@@ -37,22 +37,6 @@ local Commands = {
             plr.Character["ForceField"]:Destroy()
         end
     end,
-    settime = function(plr, args)
-        local QueueConfig = require(game.ServerScriptService.ModuleLoader.QueueConfig)
-        if tonumber(args[1]) == nil then
-            return
-        end
-        QueueConfig.COUNTDOWN_TIME = tonumber(args[1])
-    end,
-    setminplayers = function(plr, args)
-        print("Setting Min Players:", args[1])
-        print(args)
-        local QueueConfig = require(game.ServerScriptService.ModuleLoader.QueueConfig)
-        if tonumber(args[1]) == nil then
-            return
-        end
-        QueueConfig.MIN_PLAYERS = tonumber(args[1])
-    end
 }
 
 local function onChatted(plr, msg)
