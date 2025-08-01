@@ -1,8 +1,14 @@
 local Countdown = {}
+
+local CS = game:GetService("CollectionService")
 local TeleportService = game:GetService("TeleportService")
+
 local Config = require(script.Parent.QueueConfig)
 local QueueManager = require(script.Parent.QueueManager)
-local Timer = game.Workspace.QueueFolder.Timer.Display.SurfaceGui.Time
+local Timer
+for _, x in ipairs(CS:GetTagged("Timer")) do
+    Timer = x["Display"]["SurfaceGui"]["Time"]
+end
 
 local function formatTime(seconds)
     local minutes = math.floor(seconds / 60)
