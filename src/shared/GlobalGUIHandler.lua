@@ -1,5 +1,8 @@
 local GlobalGUIHandler = {}
 
+local TS = game:GetService("TweenService")
+local RS = game:GetService("RunService")
+local CS = game:GetService("CollectionService")
 local plr = game.Players.LocalPlayer
 
 local function NoErr(fn, errMsg, errReturn)
@@ -11,11 +14,30 @@ local function NoErr(fn, errMsg, errReturn)
     return err
 end
 
+local camera = game.Workspace.CurrentCamera
+local lastFOV = camera.FieldOfView
+local function cameraZoom(targetGUI)
+    if not RS:IsClient() or not camera or not camera:IsA("Camera") then
+        return
+    end
+
+    local goalFOV
+    if targetGUI.Visible or targetGUI == "Overide" then
+        goalFOV = 65
+    else
+        goalFOV = lastFOV
+    end
+    local tween = TS:Create(camera, TweenInfo.new(0.2, Enum.EasingStyle.Quad, Enum.EasingDirection.Out), {
+        FieldOfView = goalFOV
+    })
+
+    tween:Play()
+end
+
 function GlobalGUIHandler:GetGUIsWithTag(tagName)
-    local CollectionService = game:GetService("CollectionService")
     local loaded = NoErr(function()
         local loadG = {}
-        for _, item in ipairs(CollectionService:GetTagged(tagName)) do
+        for _, item in ipairs(CS:GetTagged(tagName)) do
             if item:IsA("GuiObject") then
                 if item:IsDescendantOf(plr.PlayerGui) and not table.find(loadG, item) then
                     table.insert(loadG, item)
@@ -63,6 +85,7 @@ NoErr(function()
                 end
                 debounce = true
                 gui.Visible = false
+                cameraZoom(gui)
                 task.delay(0.1, function()
                     debounce = false
                 end)
@@ -98,6 +121,7 @@ function GlobalGUIHandler:ActivateGUI(input, guiList)
 
         if targetGUI then
             targetGUI.Visible = not targetGUI.Visible
+            cameraZoom(targetGUI)
         else
             warn("No popup GUI found matching: " .. tostring(target))
         end
@@ -110,6 +134,18 @@ function GlobalGUIHandler:HideOtherGUI(input, guiList)
 
         for _, gui in ipairs(guiList) do
             if gui:IsA("Frame") and not gui.Name:lower():find(target:lower(), 1, true) then
+                gui.Visible = false
+            end
+        end
+    end, "Error: ")
+end
+
+function GlobalGUIHandler:HideAllGUI(input, guiList)
+    NoErr(function()
+        local target = CheckForConfig(input)
+
+        for _, gui in ipairs(guiList) do
+            if gui:IsA("Frame") then
                 gui.Visible = false
             end
         end
