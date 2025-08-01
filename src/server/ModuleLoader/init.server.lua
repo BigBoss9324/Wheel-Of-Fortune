@@ -9,3 +9,8 @@ for _, module in ipairs(ModuleLoader:GetChildren()) do
 		end
 	end
 end
+
+if game.PlaceId == 77660193270787 then
+	script.Starting:Destroy()
+	return
+end
