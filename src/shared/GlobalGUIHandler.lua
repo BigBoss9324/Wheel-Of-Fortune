@@ -13,7 +13,6 @@ end
 
 function GlobalGUIHandler:GetGUIsWithTag(tagName)
     local CollectionService = game:GetService("CollectionService")
-
     local loaded = NoErr(function()
         local loadG = {}
         for _, item in ipairs(CollectionService:GetTagged(tagName)) do
@@ -29,7 +28,6 @@ function GlobalGUIHandler:GetGUIsWithTag(tagName)
         end
         return loadG
     end, "Error retrieving GUIs with tag: " .. tagName, nil)
-
     return loaded
 end
 
@@ -73,17 +71,22 @@ NoErr(function()
             closeBtn.Activated:Connect(x)
         end
     end
-end, "Error handling popup GUI2: ")
+end, "Error: ")
+
+local function CheckForConfig(input)
+    local config = input:FindFirstChild("Configuration")
+    local target = config and config:GetAttribute("OpenGUI")
+
+    if not target then
+        warn("Activator does not have a valid 'Configuration' or 'OpenGUI' attribute.")
+        return
+    end
+    return target
+end
 
 function GlobalGUIHandler:ActivateGUI(input, guiList)
     NoErr(function()
-        local config = input:FindFirstChild("Configuration")
-        local target = config and config:GetAttribute("OpenGUI")
-
-        if not target then
-            warn("Activator does not have a valid 'Configuration' or 'OpenGUI' attribute.")
-            return
-        end
+        local target = CheckForConfig(input)
 
         local targetGUI
         for _, gui in ipairs(guiList) do
@@ -94,12 +97,23 @@ function GlobalGUIHandler:ActivateGUI(input, guiList)
         end
 
         if targetGUI then
-            print("Toggling visibility for GUI: " .. targetGUI.Name)
             targetGUI.Visible = not targetGUI.Visible
         else
             warn("No popup GUI found matching: " .. tostring(target))
         end
-    end, "Error handling: ")
+    end, "Error: ")
+end
+
+function GlobalGUIHandler:HideOtherGUI(input, guiList)
+    NoErr(function()
+        local target = CheckForConfig(input)
+
+        for _, gui in ipairs(guiList) do
+            if gui:IsA("Frame") and not gui.Name:lower():find(target:lower(), 1, true) then
+                gui.Visible = false
+            end
+        end
+    end, "Error: ")
 end
 
 for _, Activator in ipairs(GUIActivators) do
@@ -112,6 +126,7 @@ for _, Activator in ipairs(GUIActivators) do
                 end
                 debounce = true
                 GlobalGUIHandler:ActivateGUI(Activator, popups)
+                GlobalGUIHandler:HideOtherGUI(Activator, popups)
                 task.delay(0.1, function()
                     debounce = false
                 end)
@@ -126,6 +141,7 @@ for _, Activator in ipairs(GUIActivators) do
             if ProximityPrompt and ProximityPrompt:IsA("ProximityPrompt") then
                 ProximityPrompt.Triggered:Connect(function(player)
                     GlobalGUIHandler:ActivateGUI(Activator, popups)
+                    GlobalGUIHandler:HideOtherGUI(Activator, popups)
                 end)
             end
         end
