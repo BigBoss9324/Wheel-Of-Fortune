@@ -77,7 +77,13 @@ local function teleportPlayers()
 
         local success, err = pcall(function()
             local teleportOptions = Instance.new("TeleportOptions")
+
+            local teleportData = {
+                PlayersCount = #playersToTeleport,
+            }
+
             teleportOptions.ShouldReserveServer = true
+            teleportOptions:SetTeleportData(teleportData)
             local teleportAsyncResult = TeleportService:TeleportAsync(Config.PLACE_ID, {playersToTeleport}, teleportOptions)
 
             -- Testing
