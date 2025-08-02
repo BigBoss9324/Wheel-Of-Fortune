@@ -3,26 +3,35 @@ local Admins = {267811095}
 
 local Prefix = ":"
 
+-- Will come back to later to expand on
+
+
+local function GetPlayerFromArg(arg)
+    local targetName = string.lower(arg)
+    local y = nil
+    for _, x in ipairs(game.Players:GetPlayers()) do
+        if string.find(string.lower(x.Name), targetName, 1, true) then
+            y = x
+            break
+        end
+    end
+    if y then
+        return y
+    else
+        warn("Player not found:", arg)
+        return nil
+    end
+end
 local Commands = {
     respawn = function(plr, args)
+        if args[1] and args[1] ~= "" then
+            plr = GetPlayerFromArg(args[1])
+        end
         plr:LoadCharacter()
     end,
     kill = function(plr, args)
         if args[1] and args[1] ~= "" then
-            local targetName = string.lower(args[1])
-            local y = nil
-            for _, x in ipairs(game.Players:GetPlayers()) do
-                if string.find(string.lower(x.Name), targetName, 1, true) then
-                    y = x
-                    break
-                end
-            end
-            if y then
-                plr = y
-            else
-                warn("Player not found:", args[1])
-                return
-            end
+            plr = GetPlayerFromArg(args[1])
         end
         local char = plr.Character
         if char then
@@ -30,13 +39,16 @@ local Commands = {
         end
     end,
     refresh = function(plr, args)
+        if args[1] and args[1] ~= "" then
+            plr = GetPlayerFromArg(args[1])
+        end
         local pos = plr.Character:GetPrimaryPartCFrame()
         plr:LoadCharacter()
         plr.Character:SetPrimaryPartCFrame(pos)
         if plr.Character:FindFirstChild("ForceField") then
             plr.Character["ForceField"]:Destroy()
         end
-    end,
+    end
 }
 
 local function onChatted(plr, msg)
