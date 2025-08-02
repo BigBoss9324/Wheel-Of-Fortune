@@ -2,6 +2,8 @@ local Countdown = {}
 
 local CS = game:GetService("CollectionService")
 local TeleportService = game:GetService("TeleportService")
+local DataStoreService = game:GetService("DataStoreService")
+local ServerAccessCodes = DataStoreService:GetDataStore("ServerCodeData")
 
 local Config = require(script.Parent.QueueConfig)
 local QueueManager = require(script.Parent.QueueManager)
@@ -74,8 +76,12 @@ local function teleportPlayers()
         task.wait(0.2)
 
         local success, err = pcall(function()
-            local reservedCode = TeleportService:ReserveServer(Config.PLACE_ID)
-            TeleportService:TeleportToPrivateServer(Config.PLACE_ID, reservedCode, playersToTeleport)
+            local teleportOptions = Instance.new("TeleportOptions")
+            teleportOptions.ShouldReserveServer = true
+            local teleportAsyncResult = TeleportService:TeleportAsync(Config.PLACE_ID, {playersToTeleport}, teleportOptions)
+
+            -- Testing
+            ServerAccessCodes:SetAsync(teleportAsyncResult.ReservedServerAccessCode, teleportAsyncResult.PrivateServerId)
         end)
 
         if not success then
