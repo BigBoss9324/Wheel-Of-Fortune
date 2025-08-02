@@ -71,7 +71,7 @@ local function teleportPlayers()
 
     local playersToTeleport = getQueuedPlayers()
     if #playersToTeleport >= Config.MIN_PLAYERS then
-        task.wait(1)
+        task.wait(0.2)
 
         local success, err = pcall(function()
             local reservedCode = TeleportService:ReserveServer(Config.PLACE_ID)
