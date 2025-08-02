@@ -5,9 +5,29 @@ local TeleportService = game:GetService("TeleportService")
 
 local Config = require(script.Parent.QueueConfig)
 local QueueManager = require(script.Parent.QueueManager)
-local Timer
-for _, x in ipairs(CS:GetTagged("Timer")) do
-    Timer = x["Display"]["SurfaceGui"]["Time"]
+
+local function NoErr(fn, errMsg, errReturn)
+    local suc, err = pcall(fn)
+    if not suc then
+        warn(errMsg, err)
+        return errReturn
+    end
+    return err
+end
+
+local function GetTag(tagName)
+    local loaded = NoErr(function()
+        local loadG = {}
+        for _, item in ipairs(CS:GetTagged(tagName)) do
+            if item:IsA("TextLabel") then
+                if not table.find(loadG, item) then
+                    table.insert(loadG, item)
+                end
+            end
+        end
+        return loadG
+    end, "Error retrieving GUIs with tag: " .. tagName, nil)
+    return loaded
 end
 
 local function formatTime(seconds)
@@ -16,7 +36,14 @@ local function formatTime(seconds)
     return string.format("%02d:%02d", minutes, secs)
 end
 
--- Gets all active players in queue
+local timer = {}
+timer = GetTag("timerText")
+local function updateAllTimers(text)
+    for _, t in ipairs(timer) do
+        t.Text = text
+    end
+end
+
 local function getQueuedPlayers()
     local players = {}
     for plr, _ in pairs(QueueManager:GetAllPlayers()) do
@@ -29,6 +56,49 @@ local function getQueuedPlayers()
     return players
 end
 
+local function teleportPlayers()
+    local count = 3
+    local teleporting = task.spawn(function()
+        local dots = {"", ".", "..", "..."}
+        while count >= 0 do
+            for _, suffix in ipairs(dots) do
+                updateAllTimers("Teleporting" .. suffix)
+                task.wait(0.35)
+            end
+            count = count - 1
+        end
+    end)
+
+    local playersToTeleport = getQueuedPlayers()
+    if #playersToTeleport >= Config.MIN_PLAYERS then
+        task.wait(1)
+
+        local success, err = pcall(function()
+            local reservedCode = TeleportService:ReserveServer(Config.PLACE_ID)
+            TeleportService:TeleportToPrivateServer(Config.PLACE_ID, reservedCode, playersToTeleport)
+        end)
+
+        if not success then
+            task.cancel(teleporting)
+            updateAllTimers("Teleport Failed Due to an Error :/ \n" .. tostring(err))
+            warn("Teleport failed:", err)
+            task.wait(1)
+        end
+
+    else
+        task.cancel(teleporting)
+        updateAllTimers("Not enough players \n to teleport.")
+    end
+end
+
+local function playTone()
+	local tone = game.Workspace.QueueFolder:FindFirstChild("Tone")
+	if tone and tone:IsA("Sound") then
+		tone:Stop()
+		tone:Play()
+	end
+end
+
 task.spawn(function()
     while true do
         local countdown = Config.COUNTDOWN_TIME
@@ -38,55 +108,22 @@ task.spawn(function()
             if Config.COUNTDOWN_TIME ~= lastCountdownTime then
                 countdown = Config.COUNTDOWN_TIME
                 lastCountdownTime = countdown
-                Timer.Text = "Changing Timer to " .. tostring(Config.COUNTDOWN_TIME)
+                updateAllTimers("Changing Timer to " .. tostring(Config.COUNTDOWN_TIME))
                 task.wait(1.5)
             end
             if Config.MIN_PLAYERS ~= lastPlayerMin then
                 lastPlayerMin = Config.MIN_PLAYERS
-                Timer.Text = "Changing Min Player \n Requirement to " .. tostring(Config.MIN_PLAYERS)
+                updateAllTimers("Changing Min Player \n Requirement to " .. tostring(Config.MIN_PLAYERS))
                 task.wait(1.5)
             end
-            Timer.Text = formatTime(countdown)
+            updateAllTimers(formatTime(countdown))
             task.wait(1)
-            local tone = game.Workspace.QueueFolder.Timer.Tone
-            tone:Stop()
-            tone:Play()
+            playTone()
             countdown = countdown - 1
         end
 
-        local count = 3
-        local teleporting = task.spawn(function()
-            local dots = {"", ".", "..", "..."}
-            while count >= 0 do
-                for _, suffix in ipairs(dots) do
-                    Timer.Text = "Teleporting" .. suffix
-                    task.wait(0.35)
-                end
-                count = count - 1
-            end
-        end)
-
-        local playersToTeleport = getQueuedPlayers()
-        if #playersToTeleport >= Config.MIN_PLAYERS then
-            task.wait(1)
-
-            local success, err = pcall(function()
-                local reservedCode = TeleportService:ReserveServer(Config.PLACE_ID)
-                TeleportService:TeleportToPrivateServer(Config.PLACE_ID, reservedCode, playersToTeleport)
-            end)
-
-            if not success then
-                task.cancel(teleporting)
-                Timer.Text = "Teleport Failed Due to an Error :/ \n" .. tostring(err)
-                warn("Teleport failed:", err)
-                task.wait(1)
-            end
-
-        else
-            task.cancel(teleporting)
-            Timer.Text = "Not enough players \n to teleport."
-        end
-        task.wait(count + 2.5)
+        teleportPlayers()
+        task.wait(2.5)
     end
 end)
 
